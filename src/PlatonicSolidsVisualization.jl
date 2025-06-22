@@ -1,5 +1,7 @@
 module PlatonicSolidsVisualization
-include("visualizer.jl")
+include("Visualizer.jl")
+include("Icosahedron.jl")
+include("Cube.jl")
 
 export plot_icosahedron
 end
