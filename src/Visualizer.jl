@@ -23,26 +23,78 @@ function rotate_vertices(vertices::Vector{Vector{Float64}}; yaw=0, pitch=0, roll
     return rotated_vertices
 end
 
+#function filter_visible_vertices(vertices::Vector{Vector{Float64}},vision_vector::Vector{Float64},faces::Vector{Vector{Int}})
+function filter_visible_vertices(vertices,vision_vector,faces)
+    visible_vertex_indices = Set()
+
+    # keep the winding order of the faces in mind!
+
+    for face in faces
+        v₁ = vertices[face[1]]
+        v₂ = vertices[face[2]]
+        v₃ = vertices[face[3]]
+
+        e₁ = v₂ - v₁
+        e₂ = v₃ - v₁
+        normal_vector = e₁ × e₂ 
+
+        # face is not visible
+        if normal_vector ⋅ vision_vector >= 0
+            continue
+        end
+
+        for v in face
+            push!(visible_vertex_indices,v)
+        end
+    end
+
+    return visible_vertex_indices
+end
+
 function project_to_2D(vertices::Vector{Vector{Float64}})
-    projected_vertices = [v[1:2] for v in vertices]
+    projected_vertices = [(x=v[1],y=v[2]) for v in vertices]
 
     return projected_vertices
 end
 
-function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{Int,Int}})
+function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{Int,Int}},faces::Vector{Vector{Int}})
     GLMakie.activate!
 
     figure = Figure()
 
-    projected_vertices = project_to_2D(rotate_vertices(vertices))
+    axis = Axis(figure[1, 1]; aspect=DataAspect())
 
-    axis = Axis(figure[1, 1])
+    slider_pitch = Slider(figure[2, 1], range=0:1:360, startvalue=0)
+    slider_roll = Slider(figure[1,2], range=0:1:360, horizontal=false,startvalue=0)
+
+    projected_vertices = lift(slider_pitch.value, slider_roll.value) do pitch, roll
+        project_to_2D(rotate_vertices(vertices, pitch=pitch, roll=roll))
+    end
+
+    visible_vertices = lift(slider_pitch.value, slider_roll.value) do pitch, roll
+        filter_visible_vertices(rotate_vertices(vertices,pitch=pitch,roll=roll),[0,0,1],faces)
+    end
+
+    projected_edges = []
 
     for (i, j) in edges
-        p1 = projected_vertices[i]
-        p2 = projected_vertices[j]
+        edge = lift(projected_vertices,visible_vertices) do v,visible_vertices
+            
+            if i ∉ visible_vertices || j ∉ visible_vertices
+                [Point2f(NaN,NaN),Point2f(NaN,NaN)]
+            else 
 
-        lines!([p1[1], p2[1]], [p1[2], p2[2]], color=:black)
+                a = Point2f(v[i].x, v[i].y)
+                b = Point2f(v[j].x, v[j].y)
+
+                [a, b]
+            end
+        end
+        push!(projected_edges, edge)
+    end
+
+    for edge in projected_edges
+        lines!(edge, color=:black)
     end
 
     display(figure)
