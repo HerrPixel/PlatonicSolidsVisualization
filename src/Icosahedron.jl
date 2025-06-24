@@ -56,9 +56,8 @@ function icosahedron_edges()::Vector{Tuple{Int,Int}}
 end
 
 function icosahedron_faces()::Vector{Vector{Int}}
-    # double check, something still seems wrong
     faces = [
-        [1, 2, 6],
+        [1, 6,2],
         [1, 2, 8],
         [1, 11, 6],
         [1, 8, 12],
