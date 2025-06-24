@@ -102,23 +102,45 @@ function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{I
     projected_edges = []
 
     for (i, j) in edges
-        edge = lift(projected_vertices,visible_vertices) do v,visible_vertices
-            
-            if i ∉ visible_vertices || j ∉ visible_vertices
-                [Point2f(NaN,NaN),Point2f(NaN,NaN)]
-            else 
-
-                a = Point2f(v[i].x, v[i].y)
-                b = Point2f(v[j].x, v[j].y)
+        edge = lift(projected_vertices) do vertices
+            a = Point2f(vertices[i].x, vertices[i].y)
+            b = Point2f(vertices[j].x, vertices[j].y)
 
                 [a, b]
-            end
         end
+
         push!(projected_edges, edge)
     end
 
-    for edge in projected_edges
-        lines!(edge, color=:black)
+    is_vertex_visible = lift(slider_pitch.value, slider_roll.value) do pitch, roll
+        filter_visible_vertices(rotate_vertices(vertices, pitch=pitch, roll=roll), [0, 0, 1], faces)
+    end
+
+    is_face_visible = lift(slider_pitch.value, slider_roll.value) do pitch, roll
+        filter_visible_faces(rotate_vertices(vertices, pitch=pitch, roll=roll), faces)
+    end
+
+    is_edge_visible = []
+
+    for (i, j) in edges
+        is_curr_edge_visible = lift(is_face_visible) do is_face_visible
+            face_indices = []
+
+            for face_index in eachindex(faces)
+                f = faces[face_index]
+                if issubset([i, j], f) && is_face_visible[face_index]
+                    return true
+                end
+            end
+
+            return false
+        end
+
+        push!(is_edge_visible, is_curr_edge_visible)
+    end
+
+    for edge_index in eachindex(projected_edges)
+        lines!(projected_edges[edge_index], color=:black, visible=is_edge_visible[edge_index])
     end
 
     display(figure)
