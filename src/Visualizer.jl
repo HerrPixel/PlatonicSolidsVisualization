@@ -24,12 +24,14 @@ function rotate_vertices(vertices::Vector{Vector{Float64}}; yaw=0, pitch=0, roll
 end
 
 #function filter_visible_vertices(vertices::Vector{Vector{Float64}},vision_vector::Vector{Float64},faces::Vector{Vector{Int}})
-function filter_visible_vertices(vertices,vision_vector,faces)
-    visible_vertex_indices = Set()
+function filter_visible_vertices(vertices, vision_vector, faces)
+    is_vertex_visible = similar(vertices, Bool)
 
     # keep the winding order of the faces in mind!
 
     for face in faces
+        is_visible = true
+
         v₁ = vertices[face[1]]
         v₂ = vertices[face[2]]
         v₃ = vertices[face[3]]
@@ -39,13 +41,16 @@ function filter_visible_vertices(vertices,vision_vector,faces)
         normal_vector = e₁ × e₂ 
 
         # face is not visible
-        if normal_vector ⋅ vision_vector >= 0
-            continue
+        if normal_vector ⋅ vision_vector < 0
+            is_visible = false
         end
 
         for v in face
-            push!(visible_vertex_indices,v)
+            is_vertex_visible[v] = is_vertex_visible[v] || is_visible
         end
+    end
+
+    return is_vertex_visible
     end
 
 function filter_visible_faces(vertices, faces; vision_vector=[0, 0, 1])
