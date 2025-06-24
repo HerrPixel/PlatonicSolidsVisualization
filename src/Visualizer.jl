@@ -48,7 +48,26 @@ function filter_visible_vertices(vertices,vision_vector,faces)
         end
     end
 
-    return visible_vertex_indices
+function filter_visible_faces(vertices, faces; vision_vector=[0, 0, 1])
+    is_face_visible = similar(faces, Bool)
+
+    for face_index in eachindex(faces)
+        face = faces[face_index]
+        is_visible = true
+
+        v₁ = vertices[face[1]]
+        v₂ = vertices[face[2]]
+        v₃ = vertices[face[3]]
+
+        e₁ = v₂ - v₁
+        e₂ = v₃ - v₁
+        normal_vector = e₁ × e₂
+
+        is_face_visible[face_index] = normal_vector ⋅ vision_vector < 0
+
+    end
+
+    return is_face_visible
 end
 
 function project_to_2D(vertices::Vector{Vector{Float64}})
