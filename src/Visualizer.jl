@@ -1,5 +1,6 @@
 using GLMakie
 using LinearAlgebra
+using Printf
 
 function rotate_vertices(vertices::Vector{Vector{Float64}}; yaw=0, pitch=0, roll=0)
     α = deg2rad(yaw)
@@ -38,7 +39,7 @@ function filter_visible_vertices(vertices, vision_vector, faces)
 
         e₁ = v₂ - v₁
         e₂ = v₃ - v₁
-        normal_vector = e₁ × e₂ 
+        normal_vector = e₁ × e₂
 
         # face is not visible
         if normal_vector ⋅ vision_vector < 0
@@ -51,7 +52,7 @@ function filter_visible_vertices(vertices, vision_vector, faces)
     end
 
     return is_vertex_visible
-    end
+end
 
 function filter_visible_faces(vertices, faces; vision_vector=[0, 0, 1])
     is_face_visible = similar(faces, Bool)
@@ -76,27 +77,23 @@ function filter_visible_faces(vertices, faces; vision_vector=[0, 0, 1])
 end
 
 function project_to_2D(vertices::Vector{Vector{Float64}})
-    projected_vertices = [(x=v[1],y=v[2]) for v in vertices]
+    projected_vertices = [(x=v[1], y=v[2]) for v in vertices]
 
     return projected_vertices
 end
 
-function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{Int,Int}},faces::Vector{Vector{Int}})
+function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{Int,Int}}, faces::Vector{Vector{Int}})
     GLMakie.activate!
 
-    figure = Figure()
+    figure = Figure(size=(1500, 1000))
 
-    axis = Axis(figure[1, 1]; aspect=DataAspect())
+    axis = Axis(figure[1, 1]; limits=((-2, 2), (-2, 2)), aspect=DataAspect(), xrectzoom=false, yrectzoom=false)
 
-    slider_pitch = Slider(figure[2, 1], range=0:1:360, startvalue=0)
-    slider_roll = Slider(figure[1,2], range=0:1:360, horizontal=false,startvalue=0)
+    slider_pitch = Slider(figure[2, 1], range=0:1:360, startvalue=0, linewidth=40)
+    slider_roll = Slider(figure[1, 2], range=0:1:360, horizontal=false, startvalue=0, linewidth=40)
 
     projected_vertices = lift(slider_pitch.value, slider_roll.value) do pitch, roll
         project_to_2D(rotate_vertices(vertices, pitch=pitch, roll=roll))
-    end
-
-    visible_vertices = lift(slider_pitch.value, slider_roll.value) do pitch, roll
-        filter_visible_vertices(rotate_vertices(vertices,pitch=pitch,roll=roll),[0,0,1],faces)
     end
 
     projected_edges = []
@@ -106,7 +103,7 @@ function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{I
             a = Point2f(vertices[i].x, vertices[i].y)
             b = Point2f(vertices[j].x, vertices[j].y)
 
-                [a, b]
+            [a, b]
         end
 
         push!(projected_edges, edge)
@@ -142,6 +139,25 @@ function plot_3D_object(vertices::Vector{Vector{Float64}}, edges::Vector{Tuple{I
     for edge_index in eachindex(projected_edges)
         lines!(projected_edges[edge_index], color=:black, visible=is_edge_visible[edge_index])
     end
+
+
+    text = lift(is_vertex_visible, projected_vertices) do is_vertex_visible, projected_vertices
+        str = ""
+
+        for i in eachindex(vertices)
+            if is_vertex_visible[i]
+                x = @sprintf("%6.3f", projected_vertices[i].x)
+                y = @sprintf("%6.3f", projected_vertices[i].y)
+
+                str *= @sprintf("%2d", i) * ": (" * x * " " * y * ")\n"
+            end
+        end
+
+        return str
+    end
+
+
+    Label(figure[1, 3], text, tellwidth=true, tellheight=false, fontsize=40, justification=:left, halign=:left, valign=:top, font = "DejaVu Sans Mono",width=500)
 
     display(figure)
 end
