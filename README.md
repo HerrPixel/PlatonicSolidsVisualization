@@ -2,6 +2,8 @@
 
 3D interactive visualization for the five platonic solids.
 
+![Visualization screenshot](https://github.com/user-attachments/assets/c88b25d0-891f-42d0-bff5-92049da6f574)
+
 This project is a simple visualizer for the platonic solids, used for choosing an aesthetically pleasing viewing angle and projection. I used this for a graphic design project and didn't want to leave a dirty codebase so I created this.
 
 ## How to Use
@@ -90,6 +92,7 @@ Substituting $z$ with our line gives:
 $$((v + x \cdot direction) - basepoint) \cdot normal = 0$$
 
 Solving for $x$:
+
 $$x = \frac{(basepoint - v) \cdot normal}{direction \cdot normal}$$
 
 Finally, the intersection point $p$ is:
