@@ -19,6 +19,10 @@ function get_platonic_solid(name::String)
     if name == "Icosahedron"
         return icosahedron_vertices(), icosahedron_edges(), icosahedron_faces()
     end
+
+    if name == "Octahedron"
+        return octahedron_vertices(),octahedron_edges(),octahedron_faces()
+    end
 end
 
 # Rotate a set of 3-dimensional points around the origin by specifying yaw,pitch and roll as angles of rotation around the 3 main axis.
@@ -247,7 +251,7 @@ function plot_platonic_solids(preset="Icosahedron")
     end
 
     # menu with which you can select a different platonic solid, calls the above helper function when changed
-    menu = Menu(figure[1, 3][1, 1], options=["Tetrahedon", "Cube", "Dodecahedron", "Icosahedron"], default=platonic_solid_name)
+    menu = Menu(figure[1, 3][1, 1], options=["Tetrahedon", "Cube", "Octahedron", "Dodecahedron", "Icosahedron"], default=platonic_solid_name)
     on(menu.selection) do solid
         vertices, edges, faces = get_platonic_solid(solid)
 
