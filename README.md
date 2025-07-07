@@ -81,16 +81,20 @@ Finally, we calculate a 2D-projection by using a view plane onto which we projec
 
 For each vertex we do this by first calculating a line given by the view point and this vertex and calculate its intersection with the view plane. If $v$ is our vertex, $direction$ is the vector of the view point <-> vertex line, $basepoint$ is any point on the view plane and $normal$ is the normal vector of the view plane, this intersecting point can be calculated by:
 
-```math
-\text{Basic line-plane intersection: $z$ is on the plane if} \\
-(z - basepoint) \cdot normal = 0 \\
-\text{Substituting $z$ with our line gives:} \\
-((v + x \cdot direction) - basepoint) \cdot normal = 0 \\
-\text{Solving for $x$}\\
-x = \frac{(basepoint - v) \cdot normal}{direction \cdot normal}\\
-\text{The intersection point $p$ is then}
-p = v + x \cdot direction
-```
+Basic line-plane intersection: $z$ is on the plane if
+
+$$(z - basepoint) \cdot normal = 0$$
+
+Substituting $z$ with our line gives:
+
+$$((v + x \cdot direction) - basepoint) \cdot normal = 0$$
+
+Solving for $x$:
+$$x = \frac{(basepoint - v) \cdot normal}{direction \cdot normal}$$
+
+Finally, the intersection point $p$ is:
+
+$$p = v + x \cdot direction$$
 
 We then have projected 2D-coordinates of our vertices and can selectively only render the visible vertices, edges, faces.
 
