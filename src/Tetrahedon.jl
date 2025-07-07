@@ -35,10 +35,5 @@ function tetrahedon_faces()::Vector{Vector{Int}}
 end
 
 function plot_tetrahedon()
-    vertices = tetrahedon_vertices()
-    edges = tetrahedon_edges()
-    faces = tetrahedon_faces()
-
-    plot_3D_object(vertices, edges, faces)
-
+    plot_platonic_solids("Tetrahedon")
 end

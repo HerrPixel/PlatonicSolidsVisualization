@@ -83,9 +83,5 @@ function icosahedron_faces()::Vector{Vector{Int}}
 end
 
 function plot_icosahedron()
-    vertices = icosahedron_vertices()
-    edges = icosahedron_edges()
-    faces = icosahedron_faces()
-
-    plot_3D_object(vertices, edges,faces)
+    plot_platonic_solids("Icosahedron")
 end

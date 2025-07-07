@@ -83,10 +83,5 @@ function dodecahedron_faces()::Vector{Vector{Int}}
 end
 
 function plot_dodecahedron()
-    vertices = dodecahedron_vertices()
-    edges = dodecahedron_edges()
-    faces = dodecahedron_faces()
-
-    plot_3D_object(vertices, edges, faces)
-
+    plot_platonic_solids("Dodecahedron")
 end

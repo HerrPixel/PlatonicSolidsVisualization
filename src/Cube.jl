@@ -45,10 +45,5 @@ function cube_faces()::Vector{Vector{Int}}
 end
 
 function plot_cube()
-    vertices = cube_vertices()
-    edges = cube_edges()
-    faces = cube_faces()
-
-    plot_3D_object(vertices, edges, faces)
-
+    plot_platonic_solids("Cube")
 end
